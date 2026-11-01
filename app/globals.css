@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0d0e10;
+  --color-surface: #16181c;
+  --color-surface-2: #1e2126;
+  --color-line: #2a2e35;
+  --color-ink: #f3f4f6;
+  --color-muted: #9aa1ac;
+  --color-accent: #c8f23d;
+  --color-accent-ink: #141a00;
+  --color-danger: #ff6b5e;
+  --color-ok: #4ade80;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-barlow), var(--font-inter), ui-sans-serif, sans-serif;
+}
+
+html {
+  color-scheme: dark;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* Siffror ska inte hoppa när de ändras */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+@utility card {
+  @apply rounded-2xl border border-line bg-surface p-4;
+}
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-semibold transition active:scale-[0.98] disabled:opacity-50;
+}
+@utility btn-primary {
+  @apply btn bg-accent text-accent-ink;
+}
+@utility btn-ghost {
+  @apply btn border border-line bg-surface-2 text-ink;
+}
+@utility input {
+  @apply w-full rounded-xl border border-line bg-surface-2 px-3 py-3 text-ink outline-none placeholder:text-muted focus:border-accent;
+}
+@utility label {
+  @apply mb-1 block text-sm text-muted;
+}
+@utility chip {
+  @apply inline-flex items-center gap-1 rounded-full border border-line bg-surface-2 px-3 py-2 text-sm transition;
+}
+@utility chip-on {
+  @apply border-accent bg-accent font-semibold text-accent-ink;
+}
+@utility h-display {
+  font-family: var(--font-display);
+  @apply font-bold uppercase tracking-wide;
+}
