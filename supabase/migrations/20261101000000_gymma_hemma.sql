@@ -166,3 +166,9 @@ drop policy if exists gym_sets_all on public.gym_sets;
 create policy gym_sets_all on public.gym_sets for all to authenticated
   using (public.gym_owns_workout_exercise(workout_exercise_id))
   with check (public.gym_owns_workout_exercise(workout_exercise_id));
+
+-- Hjälpfunktionerna behövs bara för inloggade (RLS); stäng för anonyma anrop.
+revoke execute on function public.gym_owns_workout(uuid) from public, anon;
+revoke execute on function public.gym_owns_workout_exercise(uuid) from public, anon;
+grant execute on function public.gym_owns_workout(uuid) to authenticated;
+grant execute on function public.gym_owns_workout_exercise(uuid) to authenticated;
