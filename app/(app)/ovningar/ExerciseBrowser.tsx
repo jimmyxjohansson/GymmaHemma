@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { ExerciseThumb } from "@/components/ExerciseDemo";
 import { MUSCLES, muscleLabel } from "@/lib/labels";
 import type { Equipment, Exercise, Muscle } from "@/lib/types";
 
@@ -52,8 +53,9 @@ export default function ExerciseBrowser({ exercises, equipment }: { exercises: E
           <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
             {list.map((e) => (
               <li key={e.id}>
-                <Link href={`/ovningar/${e.id}`} className="flex items-center justify-between px-4 py-3">
-                  <span>
+                <Link href={`/ovningar/${e.id}`} className="flex items-center gap-3 px-4 py-3">
+                  <ExerciseThumb name={e.name} className="h-12 w-16 shrink-0" />
+                  <span className="flex-1">
                     <span className="block">{e.name}</span>
                     <span className="text-sm text-muted">
                       {muscleLabel(e.primary_muscle)}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
+import ExerciseDemo from "@/components/ExerciseDemo";
 import ExerciseForm from "@/components/ExerciseForm";
 import ProgressChart from "@/components/ProgressChart";
 import { getEquipment } from "@/lib/data";
@@ -131,7 +132,10 @@ export default async function ExercisePage({
         </Link>
       </header>
 
-      {ex.description && <p className="card text-sm">{ex.description}</p>}
+      <section className="card">
+        <h2 className="mb-3 font-semibold">Utförande</h2>
+        <ExerciseDemo name={ex.name} description={ex.description} />
+      </section>
 
       <section className="card">
         <h2 className="mb-2 font-semibold">Utveckling</h2>

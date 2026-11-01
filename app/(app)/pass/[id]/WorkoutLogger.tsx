@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import { HowToToggle } from "@/components/ExerciseDemo";
 import ExercisePicker from "@/components/ExercisePicker";
 import { formatClock, formatDate, muscleLabel } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/client";
@@ -268,12 +269,7 @@ export default function WorkoutLogger({
               </button>
             </div>
 
-            {ex.description && (
-              <details className="text-sm text-muted">
-                <summary className="cursor-pointer select-none">Utförande</summary>
-                <p className="mt-1">{ex.description}</p>
-              </details>
-            )}
+            <HowToToggle name={ex.name} description={ex.description} />
 
             <div className="space-y-2">
               <SetHeader measure={ex.measure} />

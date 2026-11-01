@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { HowToToggle } from "@/components/ExerciseDemo";
 import ExercisePicker from "@/components/ExercisePicker";
 import { FOCUS_LABELS, GOAL_LABELS, formatDuration, muscleLabel } from "@/lib/labels";
 import type { Equipment, Exercise, Focus, Goal, PlannedExercise } from "@/lib/types";
@@ -216,6 +217,7 @@ export default function SuggestClient({
                   <IconBtn label="Ta bort" onClick={() => setPlan({ ...plan, items: plan.items.filter((_, j) => j !== i) })}>✕</IconBtn>
                 </div>
               </div>
+              <HowToToggle name={it.name} />
               <div className="grid grid-cols-3 gap-2">
                 {it.measure !== "cardio" && (
                   <NumField label="Set" value={it.sets} onChange={(v) => setItem(i, { sets: Math.max(1, Math.min(10, v ?? 1)) })} />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { ExerciseThumb } from "./ExerciseDemo";
 import { MUSCLES, muscleLabel } from "@/lib/labels";
 import type { Equipment, Exercise, Muscle } from "@/lib/types";
 
@@ -93,10 +94,11 @@ export default function ExercisePicker({
           {list.map((e) => (
             <li key={e.id}>
               <button
-                className="flex w-full items-center justify-between border-b border-line py-3 text-left"
+                className="flex w-full items-center gap-3 border-b border-line py-3 text-left"
                 onClick={() => onPick(e)}
               >
-                <span>
+                <ExerciseThumb name={e.name} className="h-10 w-14 shrink-0" />
+                <span className="flex-1">
                   <span className="block font-medium">{e.name}</span>
                   <span className="text-sm text-muted">
                     {eqById.get(e.equipment_id)?.emoji} {eqById.get(e.equipment_id)?.name} · {muscleLabel(e.primary_muscle)}
