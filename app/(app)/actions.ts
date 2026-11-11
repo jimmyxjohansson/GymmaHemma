@@ -151,6 +151,36 @@ export async function reschedulePlannedWorkoutAction(workoutId: string, formData
   revalidatePath("/", "layout");
 }
 
+/** Sparar ändringar i ett sparat pass: namn, dag och övningar (ersätter övningslistan). */
+export async function updatePlannedWorkoutAction(
+  workoutId: string,
+  input: { title: string; scheduleFor: string; items: PlannedExercise[] },
+): Promise<{ error: string } | void> {
+  const { supabase } = await requireUser();
+  const { data: w } = await supabase.from("gym_workouts").select("status").eq("id", workoutId).maybeSingle();
+  if (!w || w.status !== "planned") return { error: "Passet går inte att redigera – det är redan startat eller borttaget." };
+  if (!DATE_RE.test(input.scheduleFor)) return { error: "Välj ett giltigt datum." };
+  if (input.items.length === 0) return { error: "Passet måste ha minst en övning." };
+
+  const { error } = await supabase
+    .from("gym_workouts")
+    .update({ title: input.title.slice(0, 80) || "Pass", scheduled_for: input.scheduleFor })
+    .eq("id", workoutId);
+  if (error) return { error: "Kunde inte spara. Försök igen." };
+
+  // Byt ut övningarna (set följer med via on delete cascade)
+  const { error: delErr } = await supabase.from("gym_workout_exercises").delete().eq("workout_id", workoutId);
+  if (delErr) return { error: "Kunde inte spara övningarna. Försök igen." };
+  try {
+    await addExercisesToWorkout(supabase, workoutId, input.items, 0);
+  } catch {
+    return { error: "Kunde inte spara övningarna. Försök igen." };
+  }
+
+  revalidatePath("/", "layout");
+  redirect(`/planerat/${workoutId}?uppdaterat=1`);
+}
+
 /** Tar bort ett sparat pass. */
 export async function deletePlannedWorkoutAction(workoutId: string) {
   const { supabase } = await requireUser();

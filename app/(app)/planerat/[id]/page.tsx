@@ -11,8 +11,15 @@ import { deletePlannedWorkoutAction, reschedulePlannedWorkoutAction, startPlanne
 
 type Row = { id: string; position: number; rest_seconds: number; gym_exercises: Exercise; gym_sets: WorkoutSet[] };
 
-export default async function PlannedWorkoutPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function PlannedWorkoutPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ uppdaterat?: string }>;
+}) {
   const { id } = await params;
+  const { uppdaterat } = await searchParams;
   const { supabase } = await requireUser();
 
   const { data: workout } = await supabase.from("gym_workouts").select("*").eq("id", id).maybeSingle();
@@ -53,11 +60,18 @@ export default async function PlannedWorkoutPage({ params }: { params: Promise<{
         </p>
       </header>
 
-      <form action={startPlannedWorkoutAction.bind(null, id)}>
-        <ConfirmSubmit className="btn-primary w-full py-4 text-lg" pendingText="Startar…">
-          ▶ Starta passet nu
-        </ConfirmSubmit>
-      </form>
+      {uppdaterat && <p className="rounded-xl bg-ok/15 p-3 text-sm text-ok">✓ Ändringarna är sparade.</p>}
+
+      <div className="grid grid-cols-[1fr_auto] gap-2">
+        <form action={startPlannedWorkoutAction.bind(null, id)}>
+          <ConfirmSubmit className="btn-primary w-full py-4 text-lg" pendingText="Startar…">
+            ▶ Starta passet nu
+          </ConfirmSubmit>
+        </form>
+        <Link href={`/planerat/${id}/redigera`} className="btn-ghost py-4">
+          ✎ Redigera
+        </Link>
+      </div>
 
       <ul className="space-y-2">
         {rows.map((r) => {
