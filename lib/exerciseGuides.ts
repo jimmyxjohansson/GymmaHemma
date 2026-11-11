@@ -672,6 +672,283 @@ export const GUIDES: Record<string, ExerciseGuide> = {
     ],
     ["Studsar", "Kort rörelse"],
   ),
+
+  // Fler övningar (november 2026) -------------------------------------------
+  "Hantelpress med neutralt grepp": g(
+    "Dumbbell_Bench_Press_with_Neutral_Grip",
+    ["Ligg på bänken med hantlarna vid bröstet, handflatorna mot varandra.", "Fötterna i golvet, skulderbladen ihop.", "Pressa rakt upp tills armarna nästan är raka.", "Sänk långsamt med armbågarna nära kroppen."],
+    ["Studsar hantlarna mot bröstet", "Lyfter rumpan från bänken"],
+  ),
+  "Lutande hantelflyes": g(
+    "Incline_Dumbbell_Flyes",
+    ["Ställ bänken i 30–45° och håll hantlarna ovanför bröstet.", "Lätt böjda armbågar som du håller låsta.", "Sänk hantlarna i en båge ut åt sidorna.", "För ihop dem i samma båge."],
+    ["Böjer och sträcker armarna", "För tung vikt och för djupt"],
+  ),
+  "Enarmspress på bänk": g(
+    "One_Arm_Dumbbell_Bench_Press",
+    ["Ligg på bänken med en hantel vid bröstet.", "Håll i bänken med fria handen och spänn magen.", "Pressa hanteln rakt upp utan att kroppen vrids.", "Sänk kontrollerat. Byt sida efter alla reps."],
+    ["Kroppen roterar åt hantelns håll", "Armbågen rakt ut åt sidan"],
+  ),
+  "Bröststödd rodd på lutande bänk": g(
+    "Dumbbell_Incline_Row",
+    ["Ställ bänken i ca 30° och ligg med bröstet mot ryggstödet.", "Låt hantlarna hänga rakt ner med raka armar.", "Dra hantlarna mot höfterna och kläm ihop skulderbladen.", "Sänk långsamt."],
+    ["Lyfter bröstet från bänken", "Drar upp axlarna mot öronen"],
+  ),
+  "Shrugs med hantlar": g(
+    "Dumbbell_Shrug",
+    ["Stå rakt med en tung hantel i varje hand.", "Lyft axlarna rakt upp mot öronen.", "Håll en sekund i toppen.", "Sänk långsamt."],
+    ["Rullar axlarna runt", "Böjer armarna"],
+  ),
+  "Framåtlyft med hantlar": g(
+    "Front_Dumbbell_Raise",
+    ["Stå med hantlarna framför låren.", "Lyft en eller båda armarna rakt fram till axelhöjd, lätt böjda armbågar.", "Håll kort i toppen.", "Sänk långsamt."],
+    ["Svingar med kroppen", "Lyfter högre än axelhöjd"],
+  ),
+  "Stående axelpress med hantlar": g(
+    "Standing_Dumbbell_Press",
+    ["Stå axelbrett med hantlarna i axelhöjd.", "Spänn mage och säte.", "Pressa rakt upp tills armarna nästan är raka.", "Sänk till axelhöjd."],
+    ["Svankar bakåt", "Tar fart med benen"],
+  ),
+  "Upprätt rodd med hantlar": g(
+    "Standing_Dumbbell_Upright_Row",
+    ["Stå med hantlarna framför låren, handflatorna mot dig.", "Dra hantlarna upp längs kroppen med armbågarna först.", "Stanna när armbågarna är i axelhöjd.", "Sänk långsamt."],
+    ["Drar högre än axelhöjd – kan klämma i axeln", "För tung vikt"],
+  ),
+  "Koncentrationscurl": g(
+    "Concentration_Curls",
+    ["Sitt på bänken och luta dig fram.", "Stöd armbågen mot insidan av låret.", "Curla hanteln mot axeln.", "Sänk tills armen är rak. Byt arm."],
+    ["Lyfter armbågen från låret", "Rör överkroppen"],
+  ),
+  "Lutande bicepscurl": g(
+    "Incline_Dumbbell_Curl",
+    ["Ställ bänken i ca 45° och luta dig bakåt.", "Låt armarna hänga rakt ner.", "Curla upp utan att föra armbågarna framåt.", "Sänk hela vägen."],
+    ["Armbågarna åker fram", "Halvt rörelseomfång"],
+  ),
+  "Zottmancurl": g(
+    "Zottman_Curl",
+    ["Stå med hantlarna längs sidorna, handflatorna framåt.", "Curla upp.", "Vrid i toppen så att handflatorna pekar nedåt.", "Sänk långsamt och vrid tillbaka nere."],
+    ["Sänker för snabbt", "Gungar med kroppen"],
+  ),
+  "Liggande tricepsextension": g(
+    "Lying_Dumbbell_Tricep_Extension",
+    ["Ligg på bänken med hantlarna rakt ovanför bröstet, handflatorna mot varandra.", "Håll överarmarna stilla.", "Böj armbågarna och sänk hantlarna bredvid huvudet.", "Sträck armarna igen."],
+    ["Armbågarna glider isär", "Överarmarna rör sig"],
+  ),
+  "Hantelpress med smalt grepp": g(
+    "Close-Grip_Dumbbell_Press",
+    ["Ligg på bänken och tryck ihop hantlarna ovanför bröstet.", "Håll dem ihop under hela rörelsen.", "Sänk mot nedre delen av bröstet med armbågarna nära kroppen.", "Pressa upp."],
+    ["Hantlarna glider isär", "Armbågarna ut åt sidorna"],
+  ),
+  "Knäböj med hantlar": g(
+    "Dumbbell_Squat",
+    ["Stå axelbrett med hantlarna längs sidorna.", "Sitt ner bakåt med rak rygg och blicken framåt.", "Gå så djupt du kan med hälarna i golvet.", "Pressa upp genom hela foten."],
+    ["Rundar ryggen", "Knäna faller inåt"],
+  ),
+  "Sumoknäböj med hantel": g(
+    "Plie_Dumbbell_Squat",
+    ["Stå brett med tårna utåt.", "Håll en hantel med båda händerna mellan benen.", "Sänk dig rakt ner med knäna ut över tårna.", "Pressa upp och kläm sätet."],
+    ["Knäna faller inåt", "Lutar överkroppen framåt"],
+  ),
+  "Sidoböj med hantel": g(
+    "Dumbbell_Side_Bend",
+    ["Stå rakt med en hantel i ena handen.", "Böj dig rakt åt sidan mot hanteln.", "Res dig med magmusklerna på andra sidan.", "Byt sida efter alla reps."],
+    ["Lutar framåt eller bakåt", "För tung vikt"],
+  ),
+  "Hantelclean": g(
+    "Dumbbell_Clean",
+    ["Stå med hantlarna mellan fötterna, fäll i höften.", "Res dig explosivt och dra hantlarna nära kroppen.", "Vänd upp hantlarna och ta emot dem på axlarna med mjuka knän.", "Sänk kontrollerat."],
+    ["Lyfter med armarna i stället för benen", "Rundar ryggen i starten"],
+  ),
+  "Utåtrotation liggande": g(
+    "External_Rotation",
+    ["Ligg på sidan med armbågen i 90° mot sidan.", "Håll en lätt hantel framför magen.", "Rotera underarmen uppåt utan att flytta armbågen.", "Sänk långsamt. Byt sida."],
+    ["För tung vikt", "Armbågen lyfter från sidan"],
+  ),
+  "Kettlebellpress med två klockor": g(
+    "Two-Arm_Kettlebell_Military_Press",
+    ["Håll klockorna vid axlarna, vilande mot underarmarna.", "Spänn mage och säte.", "Pressa rakt upp tills armarna är raka.", "Sänk tillbaka till axlarna."],
+    ["Svankar", "Handlederna böjs bakåt"],
+  ),
+  "Frontböj med två kettlebells": g(
+    "Front_Squats_With_Two_Kettlebells",
+    ["Håll klockorna i racked position vid axlarna.", "Stå axelbrett, tårna lätt utåt.", "Sitt ner djupt med rak rygg och armbågarna nära kroppen.", "Pressa upp."],
+    ["Faller framåt", "Hälarna lyfter"],
+  ),
+  "Enbensmarklyft med kettlebell": g(
+    "Kettlebell_One-Legged_Deadlift",
+    ["Stå på ett ben med klockan i motsatt hand.", "Fäll framåt i höften och sträck det fria benet bakåt.", "Sänk klockan mot golvet med rak rygg.", "Res dig genom att trycka fram höften. Byt ben."],
+    ["Höften roterar upp", "Rundar ryggen"],
+  ),
+  "Kettlebell windmill": g(
+    "Kettlebell_Windmill",
+    ["Pressa upp klockan i ena handen, fötterna pekar lite åt motsatt håll.", "Titta på klockan hela tiden.", "Skjut ut höften åt klocksidan och för fria handen ner längs benet.", "Res dig tillbaka. Byt sida."],
+    ["Armen med klockan böjs", "Tappar blicken från klockan"],
+  ),
+  "Golvpress med kettlebell": g(
+    "One-Arm_Kettlebell_Floor_Press",
+    ["Ligg på rygg med knäna böjda och klockan vid bröstet.", "Överarmen vilar mot golvet.", "Pressa klockan rakt upp.", "Sänk tills överarmen nuddar golvet. Byt sida."],
+    ["Studsar armbågen mot golvet", "Handleden böjs bakåt"],
+  ),
+  "Sumo high pull": g(
+    "Kettlebell_Sumo_High_Pull",
+    ["Stå brett med klockan mellan fötterna.", "Greppa med båda händerna och res dig explosivt.", "Dra klockan upp mot hakan med armbågarna högt.", "Sänk kontrollerat."],
+    ["Lyfter bara med armarna", "Rundar ryggen"],
+  ),
+  "Kettlebell figure 8": g(
+    "Kettlebell_Figure_8",
+    ["Stå brett, fäll i höften med rak rygg.", "För klockan mellan benen från ena handen till den andra.", "Fortsätt runt utsidan av benet och tillbaka mellan benen.", "Fortsätt i jämnt tempo."],
+    ["Rundar ryggen", "Står för upprätt"],
+  ),
+  "Kettlebell push press": g(
+    "One-Arm_Kettlebell_Push_Press",
+    ["Håll klockan i racked position.", "Böj knäna lätt.", "Sträck benen explosivt och använd farten för att pressa upp klockan.", "Sänk tillbaka till axeln. Byt sida."],
+    ["För djup knäböj", "Svankar"],
+  ),
+  "Kettlebellrodd med två klockor": g(
+    "Two-Arm_Kettlebell_Row",
+    ["Stå framåtböjd med rak rygg och lätt böjda knän.", "Låt klockorna hänga rakt ner.", "Dra dem mot magen och kläm ihop skulderbladen.", "Sänk kontrollerat."],
+    ["Rundar ryggen", "Reser sig upp under rörelsen"],
+  ),
+  "Utfall med passning": g(
+    "Lunge_Pass_Through",
+    ["Stå med klockan i ena handen.", "Kliv fram i ett utfall.", "För klockan under främre låret till andra handen.", "Kliv tillbaka och upprepa med andra benet."],
+    ["Tappar balansen – ta det lugnt", "Främre knät faller inåt"],
+  ),
+  "Kabelflyes med en arm": g(
+    "Single-Arm_Cable_Crossover",
+    ["Stå i sidled mot övre taljan och greppa handtaget.", "Kliv ut så att armen är sträckt snett uppåt.", "Dra handtaget i en båge ner och in framför kroppen.", "Släpp tillbaka kontrollerat. Byt sida."],
+    ["Böjer armen för mycket", "Vrider överkroppen"],
+  ),
+  "Enarms kabelrodd": g(
+    "Seated_One-arm_Cable_Pulley_Rows",
+    ["Sitt med fötterna mot stödet och greppa handtaget med en hand.", "Rak rygg, armen sträckt.", "Dra handtaget mot höften med armbågen nära kroppen.", "Sträck armen igen. Byt sida."],
+    ["Roterar överkroppen för mycket", "Gungar fram och tillbaka"],
+  ),
+  "Triceps pushdown med rep": g(
+    "Triceps_Pushdown_-_Rope_Attachment",
+    ["Stå framför övre taljan med repet.", "Armbågarna låsta mot sidorna.", "Pressa ner och dra isär repändarna i botten.", "Låt repet komma upp till 90° i armbågen."],
+    ["Armbågarna glider", "Lutar sig över repet"],
+  ),
+  "Hammercurl med rep": g(
+    "Cable_Hammer_Curls_-_Rope_Attachment",
+    ["Stå framför nedre taljan och greppa repet med tummarna uppåt.", "Armbågarna intill sidorna.", "Curla upp mot axlarna.", "Sänk långsamt."],
+    ["Gungar med kroppen", "Armbågarna åker fram"],
+  ),
+  "Upprätt rodd i kabel": g(
+    "Upright_Cable_Row",
+    ["Stå nära nedre taljan med stången i smalt grepp.", "Dra stången upp längs kroppen med armbågarna först.", "Stanna när armbågarna är i axelhöjd.", "Sänk kontrollerat."],
+    ["Drar för högt", "Lutar sig bakåt"],
+  ),
+  "Sidolyft i kabel": g(
+    "Standing_Low-Pulley_Deltoid_Raise",
+    ["Stå i sidled mot nedre taljan och greppa handtaget med bortre handen.", "Lyft armen ut åt sidan till axelhöjd.", "Håll kort i toppen.", "Sänk långsamt. Byt sida."],
+    ["Lutar sig bort från taljan", "Drar upp axeln"],
+  ),
+  "Pull-through": g(
+    "Pull_Through",
+    ["Stå med ryggen mot nedre taljan och repet mellan benen.", "Gå några steg fram och fäll i höften med rak rygg.", "Skjut fram höften och res dig, kläm sätet.", "Fäll tillbaka kontrollerat."],
+    ["Böjer knäna för mycket", "Drar med armarna"],
+  ),
+  "Woodchop i kabel": g(
+    "Standing_Cable_Wood_Chop",
+    ["Stå i sidled mot övre taljan och greppa handtaget med båda händerna.", "Raka armar, fötterna axelbrett.", "Dra diagonalt ner mot motsatt knä och vrid i höften.", "För tillbaka kontrollerat. Byt sida."],
+    ["Böjer armarna", "Vrider bara armarna, inte bålen"],
+  ),
+  "Kabelkickback för säte": g(
+    "One-Legged_Cable_Kickback",
+    ["Fäst fotlänken runt fotleden och stå vänd mot taljan.", "Håll i maskinen och luta dig lätt framåt.", "Sparka benet rakt bakåt och kläm sätet.", "För tillbaka långsamt. Byt ben."],
+    ["Svankar", "Svingar benet"],
+  ),
+  "Latsdrag med underhandsgrepp": g(
+    "Underhand_Cable_Pulldowns",
+    ["Greppa stången axelbrett med underhandsgrepp.", "Sitt med låren under dynan, bröstet upp.", "Dra stången till övre bröstet.", "Släpp upp tills armarna är raka."],
+    ["Gungar bakåt", "Kort rörelse"],
+  ),
+  "Enarms latsdrag": g(
+    "One_Arm_Lat_Pulldown",
+    ["Fäst ett handtag i övre taljan och sitt under det.", "Greppa med en hand, armen rak.", "Dra armbågen ner mot sidan.", "Släpp upp kontrollerat. Byt sida."],
+    ["Lutar sig åt sidan", "Roterar överkroppen"],
+  ),
+  "Benspark med ett ben": g(
+    "Single-Leg_Leg_Extension",
+    ["Sitt i bensparksstationen med dynan mot ena smalbenet.", "Håll i handtagen.", "Sträck benet helt.", "Sänk långsamt. Byt ben."],
+    ["Sparkar upp med fart", "Lyfter rumpan"],
+  ),
+  "Crunches": g(
+    "Crunches",
+    ["Ligg på rygg med böjda knän och händerna vid tinningarna.", "Rulla upp axlarna från golvet med magmusklerna.", "Håll kort i toppen.", "Sänk långsamt."],
+    ["Drar i nacken med händerna", "Tar fart"],
+  ),
+  "Omvända crunches": g(
+    "Reverse_Crunch",
+    ["Ligg på rygg med knäna böjda i luften och armarna längs sidorna.", "Rulla upp höften från golvet mot bröstet.", "Håll kort.", "Sänk långsamt."],
+    ["Svingar benen", "Släpper ner för snabbt"],
+  ),
+  "Benlyft på bänk": g(
+    "Flat_Bench_Lying_Leg_Raise",
+    ["Ligg på rygg och håll i bänken bakom huvudet.", "Lyft raka ben tills de pekar uppåt.", "Sänk långsamt utan att ländryggen släpper.", "Stanna strax innan hälarna nuddar."],
+    ["Svankar när benen sänks", "Gungar"],
+  ),
+  "Fladdersparkar": g(
+    "Flutter_Kicks",
+    ["Ligg på rygg (eller på mage över bänk som på bilden).", "Lyft raka ben några centimeter.", "Sparka upp och ner växelvis i korta rörelser.", "Håll magen spänd hela tiden."],
+    ["Ländryggen släpper", "För stora rörelser"],
+  ),
+  "Korscrunch": g(
+    "Cross-Body_Crunch",
+    ["Ligg på rygg med händerna vid tinningarna.", "Lyft axlarna och för ena armbågen mot motsatt knä.", "Sänk och byt sida.", "Håll tempot lugnt."],
+    ["Drar i nacken", "Bara armbågen rör sig, inte bålen"],
+  ),
+  "Armhävningar med fötterna högt": g(
+    "Push-Ups_With_Feet_Elevated",
+    ["Fötterna på bänken, händerna i golvet lite bredare än axlarna.", "Kroppen rak, spänd mage.", "Sänk bröstet mot golvet.", "Pressa upp."],
+    ["Höften hänger", "Halvt rörelseomfång"],
+  ),
+  "Armhävningar mot bänk": g(
+    "Incline_Push-Up",
+    ["Händerna på bänkkanten, axelbrett.", "Fötterna bakåt så att kroppen är rak.", "Sänk bröstet mot bänken.", "Pressa upp."],
+    ["Rumpan sticker upp", "Armbågarna rakt ut"],
+  ),
+  "Diamantarmhävningar": g(
+    "Push-Ups_-_Close_Triceps_Position",
+    ["Händerna ihop under bröstet så att tummar och pekfingrar bildar en romb.", "Kroppen rak.", "Sänk med armbågarna längs kroppen.", "Pressa upp. För tungt? Gör på knä."],
+    ["Armbågarna åker ut", "Höften hänger"],
+  ),
+  "Enbens höftlyft": g(
+    "Single_Leg_Glute_Bridge",
+    ["Ligg på rygg med ena foten i golvet och andra benet rakt upp.", "Pressa upp höften genom hälen.", "Håll höften i våg och kläm sätet.", "Sänk. Byt ben."],
+    ["Höften tippar åt sidan", "Svankar i toppen"],
+  ),
+  "Hoppknäböj": g(
+    "Freehand_Jump_Squat",
+    ["Stå axelbrett.", "Gör en knäböj.", "Hoppa explosivt rakt upp.", "Landa mjukt och gå direkt ner i nästa knäböj."],
+    ["Landar hårt på raka ben", "Knäna faller inåt vid landning"],
+  ),
+  "Step-up med knälyft": g(
+    "Step-up_with_Knee_Raise",
+    ["Stå framför bänken och sätt ena foten på den.", "Kliv upp och lyft andra knät mot bröstet.", "Kliv ner kontrollerat.", "Alla reps på ena benet, sedan byt."],
+    ["Skjuter ifrån med nedre foten", "Tappar balansen – ta det lugnt"],
+  ),
+  "Stjärnhopp": g(
+    "Star_Jump",
+    ["Stå på huk med händerna mot knäna.", "Hoppa upp och sträck ut armar och ben.", "Landa mjukt på huk igen.", "Fortsätt i jämnt tempo."],
+    ["Landar på raka ben", "För hög puls för tidigt – hitta ett tempo"],
+  ),
+  "Armhävning med sidoplanka": g(
+    "Push_Up_to_Side_Plank",
+    ["Gör en armhävning.", "I toppen, vrid upp till sidoplanka med ena armen mot taket.", "Vrid tillbaka.", "Nästa armhävning – vrid åt andra hållet."],
+    ["Höften sjunker i sidoplankan", "Stressar – ta det kontrollerat"],
+  ),
+  "Fyrfota sätesspark": g(
+    "Glute_Kickback",
+    ["Stå på alla fyra med händerna under axlarna.", "Sparka ena benet bakåt och uppåt med knät böjt eller rakt.", "Kläm sätet i toppen.", "Sänk. Byt ben."],
+    ["Svankar", "Vrider höften"],
+  ),
+  "Gång i lutning": g(
+    "Walking_Treadmill",
+    ["Starta bandet i gångtempo.", "Höj lutningen till 6–12 %.", "Gå raskt utan att hålla i handtagen.", "Logga tid och distans."],
+    ["Håller i handtagen", "Lutar sig bakåt"],
+  ),
 };
 
 export function guideFor(name: string): ExerciseGuide | undefined {
