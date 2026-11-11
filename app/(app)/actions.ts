@@ -3,21 +3,37 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getEquipment, getExercises, getHistory, getRatings } from "@/lib/data";
-import { progression, suggestWorkout } from "@/lib/suggest";
+import { progression, suggestReplacement, suggestWorkout } from "@/lib/suggest";
 import { requireUser } from "@/lib/supabase/server";
 import type { Exercise, Focus, Goal, PlannedExercise, SuggestOptions, WorkoutExercise, WorkoutSet } from "@/lib/types";
 
 const FOCUSES: Focus[] = ["helkropp", "overkropp", "ben", "core", "kondition"];
 const GOALS: Goal[] = ["styrka", "muskler", "kondition"];
 
-export async function suggestAction(opts: SuggestOptions) {
-  const { supabase, user } = await requireUser();
-  const clean: SuggestOptions = {
+function cleanOptions(opts: SuggestOptions): SuggestOptions {
+  return {
     minutes: Math.min(120, Math.max(10, Math.round(opts.minutes))),
     focus: FOCUSES.includes(opts.focus) ? opts.focus : "helkropp",
     goal: GOALS.includes(opts.goal) ? opts.goal : "muskler",
     equipment: opts.equipment.filter((e) => typeof e === "string"),
   };
+}
+
+/** "Föreslå ny övning" för en enskild övning i ett förslag. Null om inga alternativ finns. */
+export async function replaceSuggestionAction(opts: SuggestOptions, current: PlannedExercise, excludeIds: string[]) {
+  const { supabase, user } = await requireUser();
+  const [exercises, equipment, history, ratings] = await Promise.all([
+    getExercises(supabase),
+    getEquipment(supabase),
+    getHistory(supabase, user.id, 90),
+    getRatings(supabase, user.id),
+  ]);
+  return suggestReplacement(cleanOptions(opts), current, excludeIds, exercises, equipment, history, ratings);
+}
+
+export async function suggestAction(opts: SuggestOptions) {
+  const { supabase, user } = await requireUser();
+  const clean = cleanOptions(opts);
   const [exercises, equipment, history, ratings] = await Promise.all([
     getExercises(supabase),
     getEquipment(supabase),

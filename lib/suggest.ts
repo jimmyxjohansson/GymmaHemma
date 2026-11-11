@@ -104,15 +104,16 @@ function estimateSeconds(p: PlannedExercise) {
   return p.sets * (work * perSide + p.rest_seconds) + 60;
 }
 
-export function suggestWorkout(
+/** Gemensam grund för förslagsmotorn: urval, poängsättning och planering av en övning. */
+function makeContext(
   opts: SuggestOptions,
   exercises: Exercise[],
   equipment: Equipment[],
   history: HistoryEntry[],
-  ratings: RatingMap = {},
-  now = Date.now(),
-  random: () => number = Math.random,
-): { title: string; items: PlannedExercise[]; estimatedMinutes: number } {
+  ratings: RatingMap,
+  now: number,
+  random: () => number,
+) {
   const eqById = new Map(equipment.map((e) => [e.id, e]));
   const allowed = new Set(opts.equipment.filter((id) => eqById.get(id)?.enabled !== false));
   const pool = exercises.filter((e) => !e.archived && allowed.has(e.equipment_id));
@@ -128,10 +129,6 @@ export function suggestWorkout(
     exerciseLast.set(h.exercise_id, Math.max(exerciseLast.get(h.exercise_id) ?? 0, t));
   }
   const recentlyTrained = (m: Muscle) => now - (muscleLast.get(m) ?? 0) < 2 * DAY;
-
-  let budget = opts.minutes * 60;
-  const items: PlannedExercise[] = [];
-  const used = new Set<string>();
 
   const plan = (ex: Exercise, compoundSlot: boolean, overrides?: Partial<PlannedExercise>): PlannedExercise => {
     const isCompound = ex.is_compound && compoundSlot;
@@ -168,15 +165,16 @@ export function suggestWorkout(
     };
   };
 
-  const score = (ex: Exercise, slotIndex: number) => {
+  /** slotIndex null = konditionsval, där bas-/isoleringsbonusarna inte ska gälla. */
+  const score = (ex: Exercise, slotIndex: number | null) => {
     let s = random();
-    if (ex.is_compound && slotIndex < 3) s += 1.5;
+    if (slotIndex !== null && ex.is_compound && slotIndex < 3) s += 1.5;
     // Egna favoriter och betyg ger en knuff, men slumpen ger fortfarande variation:
     // favorit +0,25, betyg 5 → +0,3 … betyg 1 → −0,3
     const pref = ratings[ex.id];
     if (pref?.favorite) s += 0.25;
     if (pref?.rating) s += (pref.rating - 3) * 0.15;
-    if (!ex.is_compound && slotIndex >= 3) s += 0.3;
+    if (slotIndex !== null && !ex.is_compound && slotIndex >= 3) s += 0.3;
     const last = exerciseLast.get(ex.id);
     if (last) {
       const daysAgo = (now - last) / DAY;
@@ -187,13 +185,39 @@ export function suggestWorkout(
     return s;
   };
 
-  // 1) Uppvärmning / konditionsblock
+  /** Väljer den med högst poäng (slump + betyg + historik). */
+  const best = (list: Exercise[], slotIndex: number | null) =>
+    list.map((e) => ({ e, s: score(e, slotIndex) })).sort((a, b) => b.s - a.s)[0]?.e;
+
   const cardioPool = pool.filter((e) => e.measure === "cardio" && CARDIO_EQUIPMENT.includes(e.equipment_id));
+  return { pool, params, plan, score, best, recentlyTrained, cardioPool };
+}
+
+/** Lugna konditionsövningar som passar som uppvärmning. */
+const WARMUP_RE = /uppvärmning|jämn|gång/i;
+const INTERVAL_RE = /intervall/i;
+
+export function suggestWorkout(
+  opts: SuggestOptions,
+  exercises: Exercise[],
+  equipment: Equipment[],
+  history: HistoryEntry[],
+  ratings: RatingMap = {},
+  now = Date.now(),
+  random: () => number = Math.random,
+): { title: string; items: PlannedExercise[]; estimatedMinutes: number } {
+  const { pool, plan, score, best, recentlyTrained, cardioPool } = makeContext(
+    opts, exercises, equipment, history, ratings, now, random,
+  );
+
+  let budget = opts.minutes * 60;
+  const items: PlannedExercise[] = [];
+  const used = new Set<string>();
+
+  // 1) Uppvärmning / konditionsblock
   if (opts.focus === "kondition") {
-    const intervals = cardioPool.filter((e) => /intervall/i.test(e.name));
-    const pick = (intervals.length ? intervals : cardioPool)
-      .map((e) => ({ e, s: score(e, 0) }))
-      .sort((a, b) => b.s - a.s)[0]?.e;
+    const intervals = cardioPool.filter((e) => INTERVAL_RE.test(e.name));
+    const pick = best(intervals.length ? intervals : cardioPool, null);
     if (pick) {
       const blockSec = Math.round((opts.minutes * 60 * 0.4) / 60) * 60;
       const p = plan(pick, false, { seconds: blockSec, hint: "Huvudblock – variera tempot" });
@@ -202,7 +226,9 @@ export function suggestWorkout(
       budget -= estimateSeconds(p);
     }
   } else if (opts.minutes >= 25) {
-    const warm = cardioPool.find((e) => /uppvärmning/i.test(e.name)) ?? cardioPool.find((e) => /jämn/i.test(e.name));
+    // Slumpa bland lugna konditionsövningar (rodd, cykel, löpband, gång) i stället för att alltid ta samma
+    const warmups = cardioPool.filter((e) => WARMUP_RE.test(e.name));
+    const warm = best(warmups.length ? warmups : cardioPool, null);
     if (warm) {
       const p = plan(warm, false, { seconds: 300, hint: "Uppvärmning, lugnt tempo" });
       items.push(p);
@@ -223,21 +249,21 @@ export function suggestWorkout(
     const muscles = asArray(slots[i]);
     const candidates = strengthPool.filter((e) => !used.has(e.id) && muscles.includes(e.primary_muscle));
     if (candidates.length === 0) continue;
-    const best = candidates.map((e) => ({ e, s: score(e, i) })).sort((a, b) => b.s - a.s)[0].e;
-    const p = plan(best, i < 4);
+    const chosen = best(candidates, i)!;
+    const p = plan(chosen, i < 4);
     // Får övningen inte plats? Prova färre set (minst 2) innan vi ger upp.
     while (estimateSeconds(p) > budget && p.sets > 2) p.sets--;
     const cost = estimateSeconds(p);
     const strengthCount = items.filter((x) => x.measure !== "cardio").length;
     if (cost > budget && (strengthCount >= minExercises || budget < 120)) break;
     items.push(p);
-    used.add(best.id);
+    used.add(chosen.id);
     budget -= cost;
   }
 
   // 3) Avsluta konditionspass med ett kort block om tid finns kvar
   if (opts.focus === "kondition" && budget > 300) {
-    const finisher = cardioPool.find((e) => !used.has(e.id));
+    const finisher = best(cardioPool.filter((e) => !used.has(e.id)), null);
     if (finisher) {
       const sec = Math.min(600, Math.floor(budget / 60) * 60 - 60);
       if (sec >= 180) items.push(plan(finisher, false, { seconds: sec, hint: "Avslutning" }));
@@ -264,13 +290,50 @@ function titleFor(focus: Focus, goal: Goal) {
   return focus === "kondition" ? "Konditionspass" : `${f[focus]} – ${g[goal]}`;
 }
 
-/** Hittar alternativa övningar för samma muskelgrupp (för "byt övning"). */
-export function alternativesFor(current: PlannedExercise, exercises: Exercise[], allowedEquipment: string[], exclude: string[]) {
-  return exercises.filter(
-    (e) =>
-      !e.archived &&
-      e.primary_muscle === current.primary_muscle &&
-      allowedEquipment.includes(e.equipment_id) &&
-      !exclude.includes(e.id),
+/**
+ * "Föreslå ny övning": byter ut en övning i ett förslag mot en annan med samma kriterier –
+ * samma huvudmuskel (eller samma typ av konditionsblock), bland passets redskap och utan
+ * övningar som redan finns i passet. Set, reps och vila behålls; vikten räknas fram från historiken.
+ * Returnerar null om det inte finns något alternativ.
+ */
+export function suggestReplacement(
+  opts: SuggestOptions,
+  current: PlannedExercise,
+  excludeIds: string[],
+  exercises: Exercise[],
+  equipment: Equipment[],
+  history: HistoryEntry[],
+  ratings: RatingMap = {},
+  now = Date.now(),
+  random: () => number = Math.random,
+): PlannedExercise | null {
+  const { pool, plan, best, cardioPool } = makeContext(opts, exercises, equipment, history, ratings, now, random);
+  const exclude = new Set([...excludeIds, current.exercise_id]);
+
+  if (current.measure === "cardio") {
+    // Samma roll: uppvärmning ↔ uppvärmning, intervaller ↔ intervaller
+    const role = (name: string) => (INTERVAL_RE.test(name) ? "intervall" : WARMUP_RE.test(name) ? "lugn" : "annat");
+    const free = cardioPool.filter((e) => !exclude.has(e.id));
+    const sameRole = free.filter((e) => role(e.name) === role(current.name));
+    const pick = best(sameRole.length ? sameRole : free, null);
+    return pick ? plan(pick, false, { seconds: current.seconds, hint: current.hint }) : null;
+  }
+
+  const candidates = pool.filter(
+    (e) => e.measure !== "cardio" && !exclude.has(e.id) && e.primary_muscle === current.primary_muscle,
   );
+  const pick = best(candidates, current.sets >= 4 ? 0 : 3);
+  if (!pick) return null;
+
+  const p = plan(pick, true);
+  // Behåll upplägget från övningen som byts ut när mätsättet är jämförbart
+  const repsLike = (m: string) => m === "weight_reps" || m === "reps";
+  return {
+    ...p,
+    sets: current.sets,
+    rest_seconds: current.rest_seconds,
+    reps: repsLike(p.measure) && repsLike(current.measure) && current.reps != null
+      ? (pick.unilateral ? Math.min(current.reps, 10) : current.reps)
+      : p.reps,
+  };
 }

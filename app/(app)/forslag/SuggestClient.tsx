@@ -5,7 +5,7 @@ import { HowToToggle } from "@/components/ExerciseDemo";
 import ExercisePicker from "@/components/ExercisePicker";
 import { FOCUS_LABELS, GOAL_LABELS, formatDuration, muscleLabel } from "@/lib/labels";
 import type { Equipment, Exercise, Focus, Goal, PlannedExercise, RatingMap } from "@/lib/types";
-import { planExerciseAction, startWorkoutAction, suggestAction } from "../actions";
+import { planExerciseAction, replaceSuggestionAction, startWorkoutAction, suggestAction } from "../actions";
 
 const MINUTES = [20, 30, 45, 60, 75];
 const STORAGE_KEY = "gymma-forslag";
@@ -76,6 +76,33 @@ export default function SuggestClient({
   function setItem(index: number, patch: Partial<PlannedExercise>) {
     if (!plan) return;
     setPlan({ ...plan, items: plan.items.map((it, i) => (i === index ? { ...it, ...patch } : it)) });
+  }
+
+  const [rerolling, setRerolling] = useState<number | null>(null);
+  const [rerollMsg, setRerollMsg] = useState<{ index: number; text: string } | null>(null);
+
+  /** Byter övningen mot en ny med samma kriterier (muskelgrupp, redskap, mål). */
+  async function reroll(index: number) {
+    if (!plan) return;
+    const current = plan.items[index];
+    setRerolling(index);
+    setRerollMsg(null);
+    try {
+      const next = await replaceSuggestionAction(
+        prefs,
+        current,
+        plan.items.map((p) => p.exercise_id),
+      );
+      if (!next) {
+        setRerollMsg({ index, text: "Inga fler alternativ med samma muskelgrupp och redskap." });
+      } else {
+        setPlan((p) => (p ? { ...p, items: p.items.map((it, i) => (i === index ? next : it)) } : p));
+      }
+    } catch {
+      setRerollMsg({ index, text: "Kunde inte hämta ett nytt förslag." });
+    } finally {
+      setRerolling(null);
+    }
   }
 
   function move(index: number, dir: -1 | 1) {
@@ -215,11 +242,23 @@ export default function SuggestClient({
                 <div className="flex shrink-0 gap-1 text-muted">
                   <IconBtn label="Flytta upp" onClick={() => move(i, -1)}>↑</IconBtn>
                   <IconBtn label="Flytta ned" onClick={() => move(i, 1)}>↓</IconBtn>
-                  <IconBtn label="Byt övning" onClick={() => setPicker({ mode: "swap", index: i })}>⇄</IconBtn>
+                  <IconBtn label="Välj övning själv" onClick={() => setPicker({ mode: "swap", index: i })}>⇄</IconBtn>
                   <IconBtn label="Ta bort" onClick={() => setPlan({ ...plan, items: plan.items.filter((_, j) => j !== i) })}>✕</IconBtn>
                 </div>
               </div>
-              <HowToToggle name={it.name} />
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <HowToToggle name={it.name} />
+                <button
+                  type="button"
+                  onClick={() => reroll(i)}
+                  disabled={rerolling !== null}
+                  className="flex items-center gap-1 rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-sm disabled:opacity-60"
+                >
+                  <span className={rerolling === i ? "inline-block animate-spin" : ""}>🎲</span>
+                  {rerolling === i ? "Letar…" : "Föreslå ny övning"}
+                </button>
+              </div>
+              {rerollMsg?.index === i && <p className="text-xs text-muted">{rerollMsg.text}</p>}
               <div className="grid grid-cols-3 gap-2">
                 {it.measure !== "cardio" && (
                   <NumField label="Set" value={it.sets} onChange={(v) => setItem(i, { sets: Math.max(1, Math.min(10, v ?? 1)) })} />
