@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
-import { getEquipment } from "@/lib/data";
+import RateExercise from "@/components/RateExercise";
+import { getEquipment, getRatings } from "@/lib/data";
 import { formatDate, formatDuration, muscleLabel } from "@/lib/labels";
 import { estimated1RM } from "@/lib/stats";
 import { requireUser } from "@/lib/supabase/server";
@@ -36,6 +37,7 @@ export default async function WorkoutDetailPage({
     supabase.from("gym_workout_exercises").select("*, gym_exercises(*), gym_sets(*)").eq("workout_id", id).order("position"),
     getEquipment(supabase),
   ]);
+  const ratings = await getRatings(supabase, user.id);
   const rows = ((data ?? []) as unknown as Row[]).map((r) => ({
     ...r,
     gym_sets: r.gym_sets.filter((s) => s.completed).sort((a, b) => a.set_number - b.set_number),
@@ -168,6 +170,9 @@ export default async function WorkoutDetailPage({
                 ))}
               </ol>
               {r.notes && <p className="mt-2 text-sm text-muted">{r.notes}</p>}
+              <div className="mt-3 border-t border-line pt-2">
+                <RateExercise exerciseId={ex.id} userId={user.id} initial={ratings[ex.id]} compact />
+              </div>
             </li>
           );
         })}

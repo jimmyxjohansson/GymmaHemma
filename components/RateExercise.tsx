@@ -12,10 +12,13 @@ export default function RateExercise({
   exerciseId,
   userId,
   initial,
+  compact = false,
 }: {
   exerciseId: string;
   userId: string;
   initial?: ExercisePref;
+  /** Mindre variant för listor, utan texter */
+  compact?: boolean;
 }) {
   const [pref, setPref] = useState<ExercisePref>(initial ?? { rating: null, favorite: false });
   const [error, setError] = useState(false);
@@ -34,6 +37,41 @@ export default function RateExercise({
       setPref(prev);
       setError(true);
     }
+  }
+
+  if (compact) {
+    return (
+      <div className="flex items-center gap-2">
+        <div className="flex items-center" role="radiogroup" aria-label="Ditt betyg">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              key={n}
+              type="button"
+              role="radio"
+              aria-checked={pref.rating === n}
+              aria-label={`${n} av 5`}
+              onClick={() => save({ ...pref, rating: pref.rating === n ? null : n })}
+              className={`px-0.5 text-xl leading-none transition active:scale-90 ${(pref.rating ?? 0) >= n ? "text-accent" : "text-line"}`}
+            >
+              ★
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => save({ ...pref, favorite: !pref.favorite })}
+          aria-pressed={pref.favorite}
+          aria-label={pref.favorite ? "Ta bort från favoriter" : "Lägg till som favorit"}
+          title={pref.favorite ? "Favorit" : "Lägg till som favorit"}
+          className={`ml-auto flex h-8 w-8 items-center justify-center rounded-full border text-lg leading-none transition active:scale-90 ${
+            pref.favorite ? "border-danger bg-danger/15 text-danger" : "border-line bg-surface-2 text-muted"
+          }`}
+        >
+          {pref.favorite ? "♥" : "♡"}
+        </button>
+        {error && <span className="text-xs text-danger">Kunde inte spara</span>}
+      </div>
+    );
   }
 
   return (
