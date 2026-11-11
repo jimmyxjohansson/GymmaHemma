@@ -4,7 +4,8 @@ import ConfirmSubmit from "@/components/ConfirmSubmit";
 import ExerciseDemo from "@/components/ExerciseDemo";
 import ExerciseForm from "@/components/ExerciseForm";
 import ProgressChart from "@/components/ProgressChart";
-import { getEquipment } from "@/lib/data";
+import RateExercise from "@/components/RateExercise";
+import { getEquipment, getRatings } from "@/lib/data";
 import { formatDate, formatDuration, MEASURE_LABELS, muscleLabel } from "@/lib/labels";
 import { estimated1RM } from "@/lib/stats";
 import { requireUser } from "@/lib/supabase/server";
@@ -27,7 +28,7 @@ export default async function ExercisePage({
   const { data } = await supabase.from("gym_exercises").select("*").eq("id", id).maybeSingle();
   if (!data) notFound();
   const ex = data as Exercise;
-  const equipment = await getEquipment(supabase);
+  const [equipment, ratings] = await Promise.all([getEquipment(supabase), getRatings(supabase, user.id)]);
   const eq = equipment.find((e) => e.id === ex.equipment_id);
 
   if (redigera) {
@@ -131,6 +132,11 @@ export default async function ExercisePage({
           Redigera
         </Link>
       </header>
+
+      <section className="card">
+        <h2 className="mb-2 text-sm text-muted">Ditt betyg</h2>
+        <RateExercise exerciseId={ex.id} userId={user.id} initial={ratings[ex.id]} />
+      </section>
 
       <section className="card">
         <h2 className="mb-3 font-semibold">Utförande</h2>

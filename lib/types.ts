@@ -98,3 +98,11 @@ export interface SuggestOptions {
   goal: Goal;
   equipment: string[];
 }
+
+/** Användarens eget betyg och favoritmarkering för en övning. */
+export interface ExercisePref {
+  rating: number | null; // 1–5
+  favorite: boolean;
+}
+/** exercise_id → betyg/favorit för inloggad användare */
+export type RatingMap = Record<string, ExercisePref>;

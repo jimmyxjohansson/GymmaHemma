@@ -1,5 +1,5 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
-import type { Equipment, Exercise, Muscle } from "./types";
+import type { Equipment, Exercise, Muscle, RatingMap } from "./types";
 import type { HistoryEntry } from "./suggest";
 
 export async function getEquipment(supabase: SupabaseClient) {
@@ -75,6 +75,20 @@ export async function getHistory(supabase: SupabaseClient, userId: string, days 
         sets: sets.map((s) => ({ ...s, weight_kg: s.weight_kg == null ? null : Number(s.weight_kg) })),
       });
     }
+  }
+  return out;
+}
+
+/** Inloggad användares betyg och favoriter. Tom om tabellen saknas (migrationen inte körd). */
+export async function getRatings(supabase: SupabaseClient, userId: string): Promise<RatingMap> {
+  const { data, error } = await supabase
+    .from("gym_exercise_ratings")
+    .select("exercise_id, rating, favorite")
+    .eq("user_id", userId);
+  if (error || !data) return {};
+  const out: RatingMap = {};
+  for (const r of data as { exercise_id: string; rating: number | null; favorite: boolean }[]) {
+    out[r.exercise_id] = { rating: r.rating, favorite: r.favorite };
   }
   return out;
 }

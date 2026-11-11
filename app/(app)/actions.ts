@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getEquipment, getExercises, getHistory } from "@/lib/data";
+import { getEquipment, getExercises, getHistory, getRatings } from "@/lib/data";
 import { progression, suggestWorkout } from "@/lib/suggest";
 import { requireUser } from "@/lib/supabase/server";
 import type { Exercise, Focus, Goal, PlannedExercise, SuggestOptions, WorkoutExercise, WorkoutSet } from "@/lib/types";
@@ -18,12 +18,13 @@ export async function suggestAction(opts: SuggestOptions) {
     goal: GOALS.includes(opts.goal) ? opts.goal : "muskler",
     equipment: opts.equipment.filter((e) => typeof e === "string"),
   };
-  const [exercises, equipment, history] = await Promise.all([
+  const [exercises, equipment, history, ratings] = await Promise.all([
     getExercises(supabase),
     getEquipment(supabase),
     getHistory(supabase, user.id, 90),
+    getRatings(supabase, user.id),
   ]);
-  return suggestWorkout(clean, exercises, equipment, history);
+  return suggestWorkout(clean, exercises, equipment, history, ratings);
 }
 
 /** Planerar en enskild övning (används när man byter eller lägger till en övning). */

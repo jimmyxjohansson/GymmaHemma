@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { ExerciseThumb } from "./ExerciseDemo";
+import { PrefBadge } from "./RateExercise";
 import { MUSCLES, muscleLabel } from "@/lib/labels";
-import type { Equipment, Exercise, Muscle } from "@/lib/types";
+import type { Equipment, Exercise, Muscle, RatingMap } from "@/lib/types";
 
 export default function ExercisePicker({
   exercises,
@@ -11,6 +12,7 @@ export default function ExercisePicker({
   title = "Välj övning",
   initialMuscle,
   excludeIds = [],
+  ratings = {},
   onPick,
   onClose,
 }: {
@@ -19,26 +21,34 @@ export default function ExercisePicker({
   title?: string;
   initialMuscle?: Muscle;
   excludeIds?: string[];
+  ratings?: RatingMap;
   onPick: (ex: Exercise) => void;
   onClose: () => void;
 }) {
   const [query, setQuery] = useState("");
   const [eq, setEq] = useState<string | null>(null);
   const [muscle, setMuscle] = useState<Muscle | null>(initialMuscle ?? null);
+  const [favOnly, setFavOnly] = useState(false);
+  const hasFavorites = Object.values(ratings).some((r) => r.favorite);
   const eqById = new Map(equipment.map((e) => [e.id, e]));
 
   const list = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return exercises.filter(
-      (e) =>
-        !excludeIds.includes(e.id) &&
-        eqById.has(e.equipment_id) &&
-        (!eq || e.equipment_id === eq) &&
-        (!muscle || e.primary_muscle === muscle) &&
-        (!q || e.name.toLowerCase().includes(q)),
-    );
+    // Favoriter först, sedan högst betyg, sedan namn
+    const rank = (e: Exercise) => (ratings[e.id]?.favorite ? 10 : 0) + (ratings[e.id]?.rating ?? 0);
+    return exercises
+      .filter(
+        (e) =>
+          !excludeIds.includes(e.id) &&
+          eqById.has(e.equipment_id) &&
+          (!eq || e.equipment_id === eq) &&
+          (!muscle || e.primary_muscle === muscle) &&
+          (!favOnly || ratings[e.id]?.favorite) &&
+          (!q || e.name.toLowerCase().includes(q)),
+      )
+      .sort((a, b) => rank(b) - rank(a) || a.name.localeCompare(b.name, "sv"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exercises, query, eq, muscle, excludeIds.join(",")]);
+  }, [exercises, query, eq, muscle, favOnly, ratings, excludeIds.join(",")]);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-bg/80 backdrop-blur-sm" onClick={onClose}>
@@ -61,6 +71,11 @@ export default function ExercisePicker({
             autoFocus
           />
           <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+            {hasFavorites && (
+              <button className={`chip shrink-0 ${favOnly ? "chip-on" : ""}`} onClick={() => setFavOnly(!favOnly)}>
+                ♥ Favoriter
+              </button>
+            )}
             <button className={`chip shrink-0 ${eq === null ? "chip-on" : ""}`} onClick={() => setEq(null)}>
               Alla redskap
             </button>
@@ -104,6 +119,7 @@ export default function ExercisePicker({
                     {eqById.get(e.equipment_id)?.emoji} {eqById.get(e.equipment_id)?.name} · {muscleLabel(e.primary_muscle)}
                   </span>
                 </span>
+                <PrefBadge pref={ratings[e.id]} />
                 <span className="text-accent">＋</span>
               </button>
             </li>

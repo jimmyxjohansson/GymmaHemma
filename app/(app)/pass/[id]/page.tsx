@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { getEquipment, getExercises } from "@/lib/data";
+import { getEquipment, getExercises, getRatings } from "@/lib/data";
 import { requireUser } from "@/lib/supabase/server";
 import type { Workout, WorkoutExercise, WorkoutSet } from "@/lib/types";
 import WorkoutLogger, { type PreviousSets } from "./WorkoutLogger";
@@ -12,10 +12,11 @@ export default async function WorkoutPage({ params }: { params: Promise<{ id: st
   if (!workout) notFound();
   if (workout.status === "done") redirect(`/historik/${id}`);
 
-  const [{ data: wes }, equipment, exercises] = await Promise.all([
+  const [{ data: wes }, equipment, exercises, ratings] = await Promise.all([
     supabase.from("gym_workout_exercises").select("*, gym_sets(*)").eq("workout_id", id).order("position"),
     getEquipment(supabase),
     getExercises(supabase),
+    getRatings(supabase, user.id),
   ]);
 
   const rows = (wes ?? []) as (WorkoutExercise & { gym_sets: WorkoutSet[] })[];
@@ -59,6 +60,7 @@ export default async function WorkoutPage({ params }: { params: Promise<{ id: st
       exercises={exercises}
       equipment={equipment}
       previous={previous}
+      ratings={ratings}
     />
   );
 }

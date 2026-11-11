@@ -1,4 +1,4 @@
-import type { Equipment, Exercise, Focus, Goal, Muscle, PlannedExercise, SuggestOptions } from "./types";
+import type { Equipment, Exercise, Focus, Goal, Muscle, PlannedExercise, RatingMap, SuggestOptions } from "./types";
 
 /** En tidigare utförd övning (från historiken), förenklad för förslagsmotorn. */
 export interface HistoryEntry {
@@ -109,6 +109,7 @@ export function suggestWorkout(
   exercises: Exercise[],
   equipment: Equipment[],
   history: HistoryEntry[],
+  ratings: RatingMap = {},
   now = Date.now(),
   random: () => number = Math.random,
 ): { title: string; items: PlannedExercise[]; estimatedMinutes: number } {
@@ -170,6 +171,11 @@ export function suggestWorkout(
   const score = (ex: Exercise, slotIndex: number) => {
     let s = random();
     if (ex.is_compound && slotIndex < 3) s += 1.5;
+    // Egna favoriter och betyg ger en knuff, men slumpen ger fortfarande variation:
+    // favorit +0,25, betyg 5 → +0,3 … betyg 1 → −0,3
+    const pref = ratings[ex.id];
+    if (pref?.favorite) s += 0.25;
+    if (pref?.rating) s += (pref.rating - 3) * 0.15;
     if (!ex.is_compound && slotIndex >= 3) s += 0.3;
     const last = exerciseLast.get(ex.id);
     if (last) {

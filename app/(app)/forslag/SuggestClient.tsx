@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { HowToToggle } from "@/components/ExerciseDemo";
 import ExercisePicker from "@/components/ExercisePicker";
 import { FOCUS_LABELS, GOAL_LABELS, formatDuration, muscleLabel } from "@/lib/labels";
-import type { Equipment, Exercise, Focus, Goal, PlannedExercise } from "@/lib/types";
+import type { Equipment, Exercise, Focus, Goal, PlannedExercise, RatingMap } from "@/lib/types";
 import { planExerciseAction, startWorkoutAction, suggestAction } from "../actions";
 
 const MINUTES = [20, 30, 45, 60, 75];
@@ -15,10 +15,12 @@ type Prefs = { minutes: number; focus: Focus; goal: Goal; equipment: string[] };
 export default function SuggestClient({
   equipment,
   exercises,
+  ratings,
   empty,
 }: {
   equipment: Equipment[];
   exercises: Exercise[];
+  ratings: RatingMap;
   empty: boolean;
 }) {
   const [prefs, setPrefs] = useState<Prefs>({
@@ -266,6 +268,7 @@ export default function SuggestClient({
         <ExercisePicker
           exercises={exercises}
           equipment={equipment}
+          ratings={ratings}
           title={picker.mode === "swap" ? "Byt övning" : "Lägg till övning"}
           initialMuscle={picker.mode === "swap" ? plan.items[picker.index]?.primary_muscle : undefined}
           excludeIds={plan.items.map((p) => p.exercise_id)}

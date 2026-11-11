@@ -5,7 +5,7 @@ import { HowToToggle } from "@/components/ExerciseDemo";
 import ExercisePicker from "@/components/ExercisePicker";
 import { formatClock, formatDate, muscleLabel } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/client";
-import type { Equipment, Exercise, Workout, WorkoutExercise, WorkoutSet } from "@/lib/types";
+import type { Equipment, Exercise, RatingMap, Workout, WorkoutExercise, WorkoutSet } from "@/lib/types";
 import { addExerciseToWorkoutAction, deleteWorkoutAction, finishWorkoutAction } from "../../actions";
 
 export type PreviousSets = Record<
@@ -24,12 +24,14 @@ export default function WorkoutLogger({
   exercises,
   equipment,
   previous,
+  ratings,
 }: {
   workout: Workout;
   initialItems: Item[];
   exercises: Exercise[];
   equipment: Equipment[];
   previous: PreviousSets;
+  ratings: RatingMap;
 }) {
   const supabase = createClient();
   const [items, setItems] = useState<Item[]>(initialItems);
@@ -401,6 +403,7 @@ export default function WorkoutLogger({
         <ExercisePicker
           exercises={exercises}
           equipment={equipment.filter((e) => e.enabled)}
+          ratings={ratings}
           title="Lägg till övning"
           excludeIds={items.map((i) => i.exercise_id)}
           onPick={addExercise}

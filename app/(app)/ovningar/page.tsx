@@ -1,11 +1,15 @@
 import Link from "next/link";
-import { getEquipment, getExercises } from "@/lib/data";
+import { getEquipment, getExercises, getRatings } from "@/lib/data";
 import { requireUser } from "@/lib/supabase/server";
 import ExerciseBrowser from "./ExerciseBrowser";
 
 export default async function ExercisesPage() {
-  const { supabase } = await requireUser();
-  const [exercises, equipment] = await Promise.all([getExercises(supabase), getEquipment(supabase)]);
+  const { supabase, user } = await requireUser();
+  const [exercises, equipment, ratings] = await Promise.all([
+    getExercises(supabase),
+    getEquipment(supabase),
+    getRatings(supabase, user.id),
+  ]);
   return (
     <div className="space-y-4">
       <header className="flex items-end justify-between">
@@ -14,7 +18,7 @@ export default async function ExercisesPage() {
           ＋ Ny övning
         </Link>
       </header>
-      <ExerciseBrowser exercises={exercises} equipment={equipment} />
+      <ExerciseBrowser exercises={exercises} equipment={equipment} ratings={ratings} />
     </div>
   );
 }
