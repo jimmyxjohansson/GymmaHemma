@@ -70,38 +70,52 @@ export default function ExercisePicker({
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
           />
-          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+          <div className="flex items-center gap-2">
+            <FilterSelect
+              icon="🏋️"
+              label="Redskap"
+              value={eq ?? ""}
+              onChange={(v) => setEq(v || null)}
+              options={equipment.map((e) => ({ value: e.id, label: `${e.emoji} ${e.name}`, short: e.name }))}
+            />
+            <FilterSelect
+              icon="💪"
+              label="Muskel"
+              value={muscle ?? ""}
+              onChange={(v) => setMuscle((v || null) as Muscle | null)}
+              options={MUSCLES.map((m) => ({ value: m, label: muscleLabel(m) }))}
+            />
             {hasFavorites && (
-              <button className={`chip shrink-0 ${favOnly ? "chip-on" : ""}`} onClick={() => setFavOnly(!favOnly)}>
-                ♥ Favoriter
+              <button
+                type="button"
+                onClick={() => setFavOnly(!favOnly)}
+                aria-pressed={favOnly}
+                aria-label="Visa bara favoriter"
+                title="Visa bara favoriter"
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-lg transition ${
+                  favOnly ? "border-danger bg-danger/15 text-danger" : "border-line bg-surface-2 text-muted"
+                }`}
+              >
+                {favOnly ? "♥" : "♡"}
               </button>
             )}
-            <button className={`chip shrink-0 ${eq === null ? "chip-on" : ""}`} onClick={() => setEq(null)}>
-              Alla redskap
-            </button>
-            {equipment.map((e) => (
-              <button
-                key={e.id}
-                className={`chip shrink-0 ${eq === e.id ? "chip-on" : ""}`}
-                onClick={() => setEq(eq === e.id ? null : e.id)}
-              >
-                {e.emoji} {e.name}
-              </button>
-            ))}
           </div>
-          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
-            <button className={`chip shrink-0 ${muscle === null ? "chip-on" : ""}`} onClick={() => setMuscle(null)}>
-              Alla muskler
-            </button>
-            {MUSCLES.map((m) => (
+          <div className="flex items-center justify-between text-xs text-muted">
+            <span>{list.length} övningar</span>
+            {(eq || muscle || favOnly || query) && (
               <button
-                key={m}
-                className={`chip shrink-0 ${muscle === m ? "chip-on" : ""}`}
-                onClick={() => setMuscle(muscle === m ? null : m)}
+                type="button"
+                className="text-accent"
+                onClick={() => {
+                  setEq(null);
+                  setMuscle(null);
+                  setFavOnly(false);
+                  setQuery("");
+                }}
               >
-                {muscleLabel(m)}
+                Rensa filter
               </button>
-            ))}
+            )}
           </div>
         </div>
         <ul className="flex-1 overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -127,5 +141,49 @@ export default function ExercisePicker({
         </ul>
       </div>
     </div>
+  );
+}
+
+/** Kompakt rullgardin som ser ut som en knapp. Native <select> ger bra väljare på mobilen. */
+function FilterSelect({
+  icon,
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  icon: string;
+  label: string;
+  value: string;
+  options: { value: string; label: string; short?: string }[];
+  onChange: (v: string) => void;
+}) {
+  const current = options.find((o) => o.value === value);
+  const active = Boolean(current);
+  return (
+    <label
+      className={`relative flex h-10 min-w-0 flex-1 items-center gap-1.5 rounded-xl border px-3 text-sm transition ${
+        active ? "border-accent bg-accent/10 text-ink" : "border-line bg-surface-2 text-muted"
+      }`}
+    >
+      <span aria-hidden>{icon}</span>
+      <span className="truncate">
+        {label}: <span className={active ? "font-semibold text-ink" : ""}>{current ? (current.short ?? current.label) : "Alla"}</span>
+      </span>
+      <span aria-hidden className="ml-auto pl-1 text-xs">▾</span>
+      <select
+        aria-label={label}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="absolute inset-0 cursor-pointer opacity-0"
+      >
+        <option value="">Alla</option>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

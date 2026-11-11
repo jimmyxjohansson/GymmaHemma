@@ -64,7 +64,7 @@ export default function ExerciseBrowser({
           Sortera efter betyg
         </label>
       </div>
-      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+      <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
         <button className={`chip shrink-0 ${muscle === null ? "chip-on" : ""}`} onClick={() => setMuscle(null)}>
           Alla muskler
         </button>

@@ -1,14 +1,26 @@
 import Link from "next/link";
 import { ensureProfile } from "@/lib/data";
 import { formatDate, formatDuration } from "@/lib/labels";
-import { weeklyStats } from "@/lib/stats";
+import { localDay, weeklyStats } from "@/lib/stats";
+import { plannedDayLabel } from "@/lib/labels";
 import { requireUser } from "@/lib/supabase/server";
 
 const WEEKDAYS = ["M", "T", "O", "T", "F", "L", "S"];
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: { searchParams: Promise<{ sparat?: string }> }) {
   const { supabase, user } = await requireUser();
-  const profile = await ensureProfile(supabase, user);
+  const [profile, sp] = await Promise.all([ensureProfile(supabase, user), searchParams]);
+
+  // Sparade pass (även missade, så att man kan starta eller ta bort dem)
+  const { data: plannedRows } = await supabase
+    .from("gym_workouts")
+    .select("id, title, scheduled_for, planned_minutes, gym_workout_exercises(id)")
+    .eq("user_id", user.id)
+    .eq("status", "planned")
+    .order("scheduled_for", { ascending: true });
+  const planned = plannedRows ?? [];
+  const today = localDay(new Date());
+  const justSaved = sp.sparat ? planned.find((p) => p.id === sp.sparat) : undefined;
 
   const since = new Date(Date.now() - 120 * 86400000).toISOString();
   const { data: workouts } = await supabase
@@ -30,6 +42,12 @@ export default async function HomePage() {
         <p className="text-muted">{greeting()}, {firstName}</p>
         <h1 className="h-display text-4xl">Dags att gymma?</h1>
       </header>
+
+      {justSaved && (
+        <p className="rounded-xl bg-ok/15 p-3 text-sm text-ok">
+          ✓ Passet ”{justSaved.title}” är sparat till {plannedDayLabel(justSaved.scheduled_for!, today).toLowerCase()}.
+        </p>
+      )}
 
       <section className="card">
         <div className="flex items-end justify-between">
@@ -55,14 +73,56 @@ export default async function HomePage() {
             <div key={d.day} className="flex flex-col items-center gap-1">
               <span className={d.isToday ? "font-bold text-ink" : "text-muted"}>{WEEKDAYS[i]}</span>
               <span
+                title={planned.some((p) => p.scheduled_for === d.day) ? "Planerat pass" : undefined}
                 className={`h-7 w-7 rounded-full border ${
-                  d.trained ? "border-accent bg-accent" : d.isToday ? "border-ink" : "border-line"
+                  d.trained
+                    ? "border-accent bg-accent"
+                    : planned.some((p) => p.scheduled_for === d.day)
+                      ? "border-2 border-dashed border-accent"
+                      : d.isToday
+                        ? "border-ink"
+                        : "border-line"
                 }`}
               />
             </div>
           ))}
         </div>
       </section>
+
+      {planned.length > 0 && (
+        <section>
+          <h2 className="h-display mb-2 text-xl">Sparade pass</h2>
+          <ul className="space-y-2">
+            {planned.map((p) => {
+              const missed = p.scheduled_for! < today;
+              const isToday = p.scheduled_for === today;
+              return (
+                <li key={p.id}>
+                  <Link
+                    href={`/planerat/${p.id}`}
+                    className={`card flex items-center justify-between gap-3 ${isToday ? "border-accent" : ""}`}
+                  >
+                    <div className="min-w-0">
+                      <p className={`text-sm ${isToday ? "font-semibold text-accent" : missed ? "text-danger" : "text-muted"}`}>
+                        {missed ? "Missat · " : ""}
+                        {plannedDayLabel(p.scheduled_for!, today)}
+                      </p>
+                      <p className="truncate font-semibold">{p.title}</p>
+                      <p className="text-sm text-muted">
+                        {(p.gym_workout_exercises ?? []).length} övningar
+                        {p.planned_minutes ? ` · ca ${p.planned_minutes} min` : ""}
+                      </p>
+                    </div>
+                    <span className={`shrink-0 text-sm ${isToday ? "btn-primary px-3 py-2" : "text-muted"}`}>
+                      {isToday ? "Visa ›" : "›"}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       <section className="grid grid-cols-2 gap-3">
         <Link href="/forslag" className="btn-primary col-span-2 py-5 text-lg">

@@ -69,3 +69,20 @@ export function formatDate(iso: string, opts?: Intl.DateTimeFormatOptions) {
     opts ?? { weekday: "short", day: "numeric", month: "short", timeZone: "Europe/Stockholm" },
   );
 }
+
+/** "Idag", "Imorgon", "Igår" eller t.ex. "Fredag 13 nov" för ett YYYY-MM-DD-datum. */
+export function plannedDayLabel(ymd: string, todayYmd: string) {
+  const [y, m, d] = ymd.split("-").map(Number);
+  const [ty, tm, td] = todayYmd.split("-").map(Number);
+  const diff = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(ty, tm - 1, td)) / 86400000);
+  if (diff === 0) return "Idag";
+  if (diff === 1) return "Imorgon";
+  if (diff === -1) return "Igår";
+  const label = new Date(Date.UTC(y, m - 1, d, 12)).toLocaleDateString("sv-SE", {
+    weekday: "long",
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}

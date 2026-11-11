@@ -11,6 +11,7 @@ export default async function WorkoutPage({ params }: { params: Promise<{ id: st
   const { data: workout } = await supabase.from("gym_workouts").select("*").eq("id", id).maybeSingle();
   if (!workout) notFound();
   if (workout.status === "done") redirect(`/historik/${id}`);
+  if (workout.status === "planned") redirect(`/planerat/${id}`);
 
   const [{ data: wes }, equipment, exercises, ratings] = await Promise.all([
     supabase.from("gym_workout_exercises").select("*, gym_sets(*)").eq("workout_id", id).order("position"),

@@ -68,3 +68,11 @@ input[type="number"] {
   font-family: var(--font-display);
   @apply font-bold uppercase tracking-wide;
 }
+
+/* Horisontellt svepbara rader utan synlig scrollbar */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

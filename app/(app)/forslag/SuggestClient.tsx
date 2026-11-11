@@ -135,7 +135,11 @@ export default function SuggestClient({
     });
   }
 
-  function start() {
+  const [scheduling, setScheduling] = useState(false);
+  const [day, setDay] = useState<string>(() => localYmd(addDays(new Date(), 1)));
+
+  /** Startar passet nu, eller sparar det till vald dag om `scheduleFor` anges. */
+  function start(scheduleFor?: string) {
     if (!plan) return;
     startStarting(async () => {
       await startWorkoutAction({
@@ -144,6 +148,7 @@ export default function SuggestClient({
         goal: empty ? null : prefs.goal,
         minutes: empty ? null : prefs.minutes,
         items: plan.items,
+        scheduleFor: scheduleFor ?? null,
       });
     });
   }
@@ -290,11 +295,61 @@ export default function SuggestClient({
             ＋ Lägg till övning
           </button>
 
-          <div className="sticky bottom-20 pt-2">
-            <button className="btn-primary w-full py-4 text-lg shadow-lg shadow-black/40" onClick={start} disabled={starting}>
-              {starting ? "Startar…" : `Starta passet${plan.items.length ? ` (${plan.items.length} övningar)` : ""}`}
-            </button>
-          </div>
+          {scheduling ? (
+            <div className="card space-y-3 border-accent">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">Spara till vilken dag?</h3>
+                <button className="text-sm text-muted" onClick={() => setScheduling(false)}>
+                  Avbryt
+                </button>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {nextDays(8).map((d) => (
+                  <button
+                    key={d.ymd}
+                    type="button"
+                    onClick={() => setDay(d.ymd)}
+                    className={`rounded-xl border px-1 py-2 text-center transition ${
+                      day === d.ymd ? "border-accent bg-accent text-accent-ink" : "border-line bg-surface-2"
+                    }`}
+                  >
+                    <span className="block text-xs">{d.top}</span>
+                    <span className="block font-semibold">{d.bottom}</span>
+                  </button>
+                ))}
+              </div>
+              <label className="flex items-center gap-2 text-sm text-muted">
+                Annat datum:
+                <input
+                  type="date"
+                  className="input w-auto flex-1 py-2"
+                  min={localYmd(new Date())}
+                  value={day}
+                  onChange={(e) => e.target.value && setDay(e.target.value)}
+                />
+              </label>
+              <button className="btn-primary w-full" onClick={() => start(day)} disabled={starting || !plan.items.length}>
+                {starting ? "Sparar…" : `Spara passet till ${dayLabel(day)}`}
+              </button>
+            </div>
+          ) : (
+            <div className="sticky bottom-20 grid grid-cols-[1fr_auto] gap-2 pt-2">
+              <button
+                className="btn-primary py-4 text-lg shadow-lg shadow-black/40"
+                onClick={() => start()}
+                disabled={starting}
+              >
+                {starting ? "Startar…" : `▶ Starta nu${plan.items.length ? ` (${plan.items.length})` : ""}`}
+              </button>
+              <button
+                className="btn-ghost py-4 shadow-lg shadow-black/40"
+                onClick={() => setScheduling(true)}
+                disabled={starting || plan.items.length === 0}
+              >
+                📅 Spara
+              </button>
+            </div>
+          )}
           {plan.items.some((p) => p.measure === "cardio") && (
             <p className="text-center text-xs text-muted">
               Konditionsblock: {formatDuration(plan.items.filter((p) => p.measure === "cardio").reduce((s, p) => s + (p.seconds ?? 0), 0))}
@@ -361,4 +416,32 @@ function NumField({
       />
     </label>
   );
+}
+
+// ---- Datumhjälp (enhetens lokala tid) ----
+function addDays(d: Date, n: number) {
+  const x = new Date(d);
+  x.setDate(x.getDate() + n);
+  return x;
+}
+function localYmd(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+function parseYmd(ymd: string) {
+  const [y, m, d] = ymd.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+function nextDays(n: number) {
+  const today = new Date();
+  return Array.from({ length: n }, (_, i) => {
+    const d = addDays(today, i);
+    const top = i === 0 ? "Idag" : i === 1 ? "Imorgon" : d.toLocaleDateString("sv-SE", { weekday: "short" });
+    return { ymd: localYmd(d), top, bottom: d.toLocaleDateString("sv-SE", { day: "numeric", month: "short" }) };
+  });
+}
+function dayLabel(ymd: string) {
+  const today = localYmd(new Date());
+  if (ymd === today) return "idag";
+  if (ymd === localYmd(addDays(new Date(), 1))) return "imorgon";
+  return parseYmd(ymd).toLocaleDateString("sv-SE", { weekday: "long", day: "numeric", month: "short" });
 }

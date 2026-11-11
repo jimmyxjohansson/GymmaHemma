@@ -75,24 +75,38 @@ export async function planExerciseAction(exerciseId: string, goal: Goal, templat
 }
 
 /** Startar ett pass från en plan (eller tomt) och skickar användaren till loggningen. */
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Bara ett pågående pass åt gången – avsluta ev. gammalt pågående pass. */
+async function closeActiveWorkouts(supabase: Awaited<ReturnType<typeof requireUser>>["supabase"], userId: string) {
+  const { data: existing } = await supabase
+    .from("gym_workouts")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("status", "active");
+  if (existing && existing.length > 0) {
+    await supabase
+      .from("gym_workouts")
+      .update({ status: "done", finished_at: new Date().toISOString() })
+      .in("id", existing.map((w) => w.id));
+  }
+}
+
+/**
+ * Skapar ett pass från en plan. Utan `scheduleFor` startas det direkt;
+ * med `scheduleFor` (YYYY-MM-DD) sparas det som planerat till den dagen.
+ */
 export async function startWorkoutAction(input: {
   title: string;
   focus?: Focus | null;
   goal?: Goal | null;
   minutes?: number | null;
   items: PlannedExercise[];
+  scheduleFor?: string | null;
 }) {
   const { supabase, user } = await requireUser();
-
-  // Bara ett pågående pass åt gången – avsluta gamla tomma pass.
-  const { data: existing } = await supabase
-    .from("gym_workouts")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("status", "active");
-  if (existing && existing.length > 0) {
-    await supabase.from("gym_workouts").update({ status: "done", finished_at: new Date().toISOString() }).in("id", existing.map((w) => w.id));
-  }
+  const planned = Boolean(input.scheduleFor && DATE_RE.test(input.scheduleFor));
+  if (!planned) await closeActiveWorkouts(supabase, user.id);
 
   const { data: workout, error } = await supabase
     .from("gym_workouts")
@@ -102,6 +116,8 @@ export async function startWorkoutAction(input: {
       focus: input.focus ?? null,
       goal: input.goal ?? null,
       planned_minutes: input.minutes ?? null,
+      status: planned ? "planned" : "active",
+      scheduled_for: planned ? input.scheduleFor : null,
     })
     .select("id")
     .single();
@@ -109,7 +125,38 @@ export async function startWorkoutAction(input: {
 
   await addExercisesToWorkout(supabase, workout.id, input.items, 0);
   revalidatePath("/", "layout");
-  redirect(`/pass/${workout.id}`);
+  redirect(planned ? `/?sparat=${workout.id}` : `/pass/${workout.id}`);
+}
+
+/** Startar ett sparat pass nu. */
+export async function startPlannedWorkoutAction(workoutId: string) {
+  const { supabase, user } = await requireUser();
+  await closeActiveWorkouts(supabase, user.id);
+  const { error } = await supabase
+    .from("gym_workouts")
+    .update({ status: "active", started_at: new Date().toISOString() })
+    .eq("id", workoutId)
+    .eq("status", "planned");
+  if (error) throw new Error(error.message);
+  revalidatePath("/", "layout");
+  redirect(`/pass/${workoutId}`);
+}
+
+/** Flyttar ett sparat pass till en annan dag. */
+export async function reschedulePlannedWorkoutAction(workoutId: string, formData: FormData) {
+  const { supabase } = await requireUser();
+  const date = String(formData.get("date") ?? "");
+  if (!DATE_RE.test(date)) return;
+  await supabase.from("gym_workouts").update({ scheduled_for: date }).eq("id", workoutId).eq("status", "planned");
+  revalidatePath("/", "layout");
+}
+
+/** Tar bort ett sparat pass. */
+export async function deletePlannedWorkoutAction(workoutId: string) {
+  const { supabase } = await requireUser();
+  await supabase.from("gym_workouts").delete().eq("id", workoutId).eq("status", "planned");
+  revalidatePath("/", "layout");
+  redirect("/");
 }
 
 async function addExercisesToWorkout(

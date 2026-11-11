@@ -44,7 +44,8 @@ export interface Workout {
   id: string;
   user_id: string;
   title: string;
-  status: "active" | "done";
+  status: "planned" | "active" | "done";
+  scheduled_for: string | null; // YYYY-MM-DD för sparade pass
   focus: Focus | null;
   goal: Goal | null;
   planned_minutes: number | null;
