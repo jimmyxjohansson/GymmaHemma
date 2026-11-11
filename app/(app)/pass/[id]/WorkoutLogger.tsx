@@ -128,6 +128,30 @@ export default function WorkoutLogger({
     );
   }
 
+  /** Bockar av (eller avmarkerar) alla set i en övning på en gång. Startar ingen vilotimer. */
+  async function toggleAll(item: Item) {
+    const done = !item.sets.every((s) => s.completed);
+    const updated = item.sets.map((s) => ({ ...s, completed: done }));
+    setItems((prev) => prev.map((it) => (it.id === item.id ? { ...it, sets: updated } : it)));
+    // Avbryt väntande sparningar för dessa set så att de inte skriver över, och spara allt direkt
+    for (const s of updated) clearTimeout(saveTimers.current.get(s.id));
+    const results = await Promise.all(
+      updated.map((s) =>
+        supabase
+          .from("gym_sets")
+          .update({
+            reps: s.reps,
+            weight_kg: s.weight_kg,
+            duration_seconds: s.duration_seconds,
+            distance_m: s.distance_m,
+            completed: s.completed,
+          })
+          .eq("id", s.id),
+      ),
+    );
+    setSaveError(results.some((r) => r.error));
+  }
+
   function toggleDone(item: Item, set: WorkoutSet) {
     const done = !set.completed;
     updateSet(item.id, set.id, { completed: done }, true);
@@ -252,8 +276,23 @@ export default function WorkoutLogger({
         return (
           <article key={item.id} className={`card space-y-3 ${allDone ? "border-accent/40" : ""}`}>
             <div className="flex items-start justify-between gap-2">
-              <div>
-                <h2 className="text-lg font-semibold">{ex.name}</h2>
+              {item.sets.length > 1 && (
+                <button
+                  onClick={() => toggleAll(item)}
+                  className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-lg font-bold transition active:scale-95 ${
+                    allDone ? "border-accent bg-accent text-accent-ink" : "border-line bg-surface-2 text-muted"
+                  }`}
+                  aria-pressed={allDone}
+                  aria-label={allDone ? "Markera hela övningen som ej klar" : "Markera hela övningen som klar"}
+                  title={allDone ? "Avmarkera alla set" : "Bocka av alla set"}
+                >
+                  ✓
+                </button>
+              )}
+              <div className="min-w-0 flex-1">
+                <h2 className={`text-lg font-semibold ${allDone ? "text-muted line-through decoration-accent/70" : ""}`}>
+                  {ex.name}
+                </h2>
                 <p className="text-sm text-muted">
                   {eqById.get(ex.equipment_id)?.emoji} {muscleLabel(ex.primary_muscle)}
                   {ex.unilateral && " · reps per sida"}
